@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>GlowGuardian | Personalized Skincare Advice</title>
+        <meta name="description" content="GlowGuardian offers personalized skincare advice and product recommendations tailored to your skin type and concerns." />
+        <link rel="stylesheet" href="styles.css" />
+    </head>
+    <body>
+        <header class="main-header">
+            <h1 class="site-title">GlowGuardian</h1>
+            <p class="tagline">Your Personalized Guide to Radiant Skin</p>
+        </header>
+        <div class="container">
+            <section class="opening-statement container">
+                <h2 class="section-header">Welcome to GlowGuardian!</h2>
+                <p>
+                    Discover your journey to healthy, glowing skin with GlowGuardian. Whether you have oily, dry, combination, or sensitive skin,
+                    we provide tailored advice to suit your unique needs. Learn how to identify your skin type and uncover personalized routines for radiant results.
+                </p>
+            </section>
+
+            <section class="skin-types container">
+                <h2 class="section-header">Different Skin Types</h2>
+
+                <article class="skin-type">
+                    <h3>Oily Skin</h3>
+                    <p>
+                        Characterized by excess sebum production, oily skin often appears shiny and may be prone to acne and blackheads. Pores tend to be larger and more visible.
+                    </p>
+                    <p><strong>How to Identify:</strong> Does your skin feel greasy throughout the day, even after cleansing?</p>
+                </article>
+
+                <article class="skin-type">
+                    <h3>Dry Skin</h3>
+                    <p>
+                        Dry skin feels tight and may have a rough texture or flakiness due to lack of moisture. This skin type is more prone to redness and sensitivity.
+                    </p>
+                    <p><strong>How to Identify:</strong> Does your skin feel tight or flaky, especially after washing?</p>
+                </article>
+
+                <article class="skin-type">
+                    <h3>Combination Skin</h3>
+                    <p>
+                        Combination skin features both oily and dry areas, often with an oily T-zone (forehead, nose, and chin) and dry cheeks.
+                    </p>
+                    <p><strong>How to Identify:</strong> Do some areas of your face feel oily while others feel dry?</p>
+                </article>
+
+                <article class="skin-type">
+                    <h3>Sensitive Skin</h3>
+                    <p>
+                        Sensitive skin is easily irritated by products, weather, or environmental factors. It often feels itchy or looks red and inflamed.
+                    </p>
+                    <p><strong>How to Identify:</strong> Does your skin react easily to new products or environmental changes?</p>
+                </article>
+
+                <article class="skin-type">
+                    <h3>Normal Skin</h3>
+                    <p>
+                        Normal skin is balanced, with minimal oiliness or dryness. It often has a smooth texture and a healthy appearance.
+                    </p>
+                    <p><strong>How to Identify:</strong> Does your skin feel balanced, with no major issues like dryness or oiliness?</p>
+                </article>
+            </section>
+
+            <div class="chatbot-container">
+                <button class="chatbot-icon" onclick="toggleChatbot()">
+                    <img src="chatbot-icon.png" alt="Chatbot Icon" />
+                </button>
+                <div id="chatbot-modal" class="chatbot-modal">
+                    <div class="chatbot-header">
+                        <img src="chatbot-icon.png" alt="Chatbot Icon" class="header-icon">
+                        <h3>GlowGuardian Assistant</h3>
+                        <button class="close-chatbot" onclick="toggleChatbot()">×</button>
+                    </div>
+                    <div class="chatbot-body">
+                        <div id="chat-display" class="chat-display"></div>
+                        <div class="chat-input-container">
+                            <input type="text" id="chat-input" placeholder="Type your message here..." 
+                                onkeypress="if(event.key === 'Enter') sendMessage()"/>
+                            <button onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                    <div class="resize-handle"></div>
+            </div>
+            <script>
+
+                function toggleChatbot() {
+                    const chatbotModal = document.getElementById('chatbot-modal');
+                    const isHidden = chatbotModal.style.display === 'none' || chatbotModal.style.display === '';
+                    
+                    chatbotModal.style.display = isHidden ? 'block' : 'none';
+                    
+                    // Show welcome message when opening the chatbot for the first time
+                    if (isHidden && !chatbotModal.dataset.welcomed) {
+                        const welcomeMessage = "Hi there! 👋 I'm your personal Skin Doctor, here to help you achieve healthy, glowing skin. 🌟 Tell me about your skin type or concerns, and I'll provide tailored skincare advice just for you. If you'd like, I can even recommend products that suit your needs. Let's get started—how can I assist you today?";
+                        displayMessage('', welcomeMessage);
+                        chatbotModal.dataset.welcomed = 'true';
+                    }
+                }
+
+                async function sendMessage() {
+                    const userInput = document.getElementById('chat-input').value;
+                    if (userInput.trim() !== "") {
+                        try {
+                            const response = await fetch('http://127.0.0.1:5000/chat', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({ message: userInput })
+                            });
+                            const data = await response.json();
+                            if (response.ok) {
+                                displayMessage(userInput, data.response);
+                            } else {
+                                alert(data.error || 'An error occurred');
+                            }
+                        } catch (error) {
+                            console.error('Error:', error);
+                            alert('Failed to connect to the server');
+                        }
+                    }
+                }
+
+                function displayMessage(userInput, response) {
+                    const chatDisplay = document.getElementById('chat-display');
+                
+                    if (userInput.trim() !== "") {
+                        const userMessage = `<div class="user-message">${userInput}</div>`;
+                        chatDisplay.innerHTML += userMessage;
+                    }
+                
+                    // Process bullet points and bold text in bot's response
+                    let formattedResponse = "";
+                    const lines = response.split('\n'); // Split into lines
+                
+                    lines.forEach(line => {
+                        if (line.startsWith("1.") || line.startsWith("2.") || line.startsWith("3.") || line.startsWith("4.")) {
+                            formattedResponse += `<div style="margin-bottom: 5px;">${line}</div>`; // Add margin for spacing
+                        } else {
+                            // Bold text within asterisks
+                            let boldedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                            formattedResponse += `<p>${boldedLine}</p>`;
+                        }
+                    });
+                
+                
+                    const botResponse = `<div class="bot-response">${formattedResponse}</div>`;
+                    chatDisplay.innerHTML += botResponse;
+                
+                    chatDisplay.scrollTop = chatDisplay.scrollHeight;
+                    document.getElementById('chat-input').value = '';
+                }
+
+            </script>
+        </div>
+
+        <footer class="main-footer">
+            <div class="container footer-container">
+                <h3 class="footer-title">GlowGuardian</h3>
+                <ul class="nav footer-nav">
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="contact.html">Contact Us</a></li>
+                </ul>
+            </div>
+        </footer>
+    </body>
+</html>
